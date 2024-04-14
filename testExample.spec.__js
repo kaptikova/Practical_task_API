@@ -1,0 +1,38 @@
+const axios = require('axios');
+
+describe('Test fetching the first 10 starred repositories', () => {
+  it('should fetch the first 10 starred repositories and validate the response structure', async () => {
+    // Замените <username> на ваше имя пользователя GitHub
+    const username = '<kaptikov>';
+    const url = `https://api.github.com/users/${username}/starred?per_page=10&sort=created`;
+
+    try {
+      const response = await axios.get(url);
+      
+      // Проверяем, что статус ответа равен 200
+      expect(response.status).toBe(200);
+
+      // Проверяем, что ответ содержит данные
+      expect(response.data).toBeTruthy();
+
+      // Проверяем, что ответ содержит массив репозиториев
+      expect(Array.isArray(response.data)).toBe(true);
+
+      // Проверяем, что массив содержит не более 10 элементов
+      expect(response.data.length).toBeLessThanOrEqual(2);
+
+      // Проверяем структуру каждого репозитория в ответе
+      response.data.forEach(repo => {
+        expect(repo).toHaveProperty('name');
+        expect(repo).toHaveProperty('description');
+        expect(repo).toHaveProperty('html_url');
+        expect(repo).toHaveProperty('owner');
+        expect(repo.owner).toHaveProperty('login');
+      });
+    } catch (error) {
+      // Обрабатываем ошибку, если запрос не удался
+      console.error('Error fetching starred repositories:', error);
+      throw error;
+    }
+  });
+});
